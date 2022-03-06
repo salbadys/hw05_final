@@ -128,6 +128,8 @@ def follow_index(request):
 def profile_follow(request, username):
     # Подписаться на автора
     user = get_object_or_404(User, username=username)
+    if request.user == user:
+        return redirect('posts:index')
     Follow.objects.get_or_create(
         user=request.user,
         author=user
