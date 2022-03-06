@@ -1,9 +1,7 @@
 from django.core.cache import cache
-from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase, Client
-from posts.models import Post, Group, Comment, Follow
+from posts.models import Post, Group
 from django.urls import reverse
-from django import forms
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
@@ -45,10 +43,4 @@ class TaskCacheTests(TestCase):
         res_2 = response_2.content
         self.assertTrue(res_1 == res_2)
         cache.clear()
-        response_3 = self.authorized_client.get(reverse('posts:index'))
         self.assertIsNone(cache.get('my_cache'))
-
-        # cache.clear()
-        # response_3 = self.guest_client.get(reverse('posts:index'))
-        # res_3 = response_3.content
-        # self.assertNotEqual(res_2, res_3)

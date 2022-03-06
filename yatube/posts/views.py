@@ -35,8 +35,10 @@ def group_posts(request, slug):
 
 def profile(request, username):
     author = get_object_or_404(User, username=username)
-    if request.user.is_authenticated == True:
-        following = Follow.objects.filter(user=request.user, author=author).exists()
+    if request.user.is_authenticated:
+        following = Follow.objects.filter(
+            user=request.user,
+            author=author).exists()
     else:
         following = None
     post_list = author.posts.all()
@@ -58,7 +60,12 @@ def post_detail(request, post_id):
     post = Post.objects.get(pk=post_id)
     comments = post.comments.all()
     count = Post.objects.filter(group=post.group).count()
-    context = {"post": post, "count": count, "form": form, "comments": comments}
+    context = {
+        "post": post,
+        "count": count,
+        "form": form,
+        "comments": comments
+    }
     return render(request, "posts/post_detail.html", context)
 
 
@@ -113,7 +120,10 @@ def add_comment(request, post_id):
 def follow_index(request):
     # информация о текущем пользователе доступна в переменной request.user
     user = request.user
-    authors_ids = Follow.objects.filter(user=user).values_list('author_id', flat=True)
+    authors_ids = Follow.objects.filter(user=user).values_list(
+        'author_id',
+        flat=True
+    )
     post_list = Post.objects.filter(author_id__in=authors_ids)
     paginator = Paginator(post_list, PER_PAGE)
     page_number = request.GET.get("page")

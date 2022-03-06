@@ -29,6 +29,7 @@ class Post(CreatedModel):
         upload_to='posts/',
         blank=True
     )
+
     class Meta:
         ordering = ["-pub_date"]
 
@@ -51,13 +52,11 @@ class Comment(CreatedModel):
 
 
 class Follow(models.Model):
-    #кто подписывается
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
         related_name="follower"
     )
-    #на кого подписываются
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,

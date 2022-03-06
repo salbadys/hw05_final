@@ -193,12 +193,18 @@ class TaskPagesTests(TestCase):
             reverse('posts:profile_follow',
                     kwargs={"username": "Mike"})
         )
-        self.assertTrue(Follow.objects.filter(user=self.user).filter(author=mike))
+        self.assertTrue(
+            Follow.objects.filter(user=self.user).
+            filter(author=mike)
+        )
         self.authorized_client.get(
             reverse('posts:profile_unfollow',
                     kwargs={"username": "Mike"})
         )
-        self.assertFalse(Follow.objects.filter(user=self.user).filter(author=mike))
+        self.assertFalse(
+            Follow.objects.filter(user=self.user).
+            filter(author=mike)
+        )
 
     def test_check_requst_view_follow(self):
         """Появленее записей у подписанных и неподп."""
