@@ -72,48 +72,51 @@ class TaskURLTests(TestCase):
 
     def test_edit_post_guest_client(self):
         response = self.guest_client.get(f"/posts/{self.test_post}/edit/")
-        self.assertRedirects(response, f"/auth/login/?next=/posts/{self.test_post}/edit/")
+        self.assertRedirects(response,
+                             f"/auth/login/?next=/posts/{self.test_post}/edit/")
         self.assertEqual(response.status_code, 302)
 
     def test_add_comment_guest_client(self):
         response = self.guest_client.get(
             reverse("posts:add_comment", kwargs={"post_id": self.test_post}),
         )
-        self.assertRedirects(response, f"/auth/login/?next=/posts/{self.test_post}/comment/")
+        self.assertRedirects(response,
+                             f"/auth/login/?next=/posts/{self.test_post}/comment/")
         self.assertEqual(response.status_code, 302)
-
 
     def test_password_change_guest(self):
         response = self.guest_client.get("/auth/password_change/")
-        self.assertRedirects(response, "/auth/login/?next=/auth/password_change/")
+        self.assertRedirects(response,
+                             "/auth/login/?next=/auth/password_change/")
         self.assertEqual(response.status_code, 302)
-
 
     def test_password_change_user(self):
         response = self.authorized_client.get("/auth/password_change/")
         self.assertEqual(response.status_code, 200)
-
 
     def test_follow_guest(self):
         response = self.guest_client.get("/follow/")
         self.assertRedirects(response, "/auth/login/?next=/follow/")
         self.assertEqual(response.status_code, 302)
 
-
     def test_follow_user(self):
         response = self.authorized_client.get("/follow/")
         self.assertTemplateUsed(response, "posts/follow.html")
         self.assertEqual(response.status_code, 200)
-
 
     def test_tech_page_user(self):
         response = self.guest_client.get("/about/tech/")
         self.assertTemplateUsed(response, "about/tech.html")
         self.assertEqual(response.status_code, 200)
 
-
     def test_about_my_page_user(self):
         response = self.guest_client.get("/about/author/")
         self.assertTemplateUsed(response, "about/author.html")
         self.assertEqual(response.status_code, 200)
+
+    def test_follow_self_user(self):
+        response = self.authorized_client.get(f"/profile/{self.user}/follow/")
+        self.assertRedirects(response, "/")
+        self.assertEqual(response.status_code, 302)
+
 

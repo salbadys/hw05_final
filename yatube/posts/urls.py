@@ -13,7 +13,7 @@ urlpatterns = [
     # Создание записи
     path("create/", views.post_create, name="post_create"),
     path("posts/<post_id>/edit/", views.post_edit, name="post_edit"),
-    #это моя фишка(вне ЯП)
+    # это моя фишка(вне ЯП)
     path("posts/<int:post_id>/delete/", views.post_delete, name="post_delete"),
     path('posts/<post_id>/comment/', views.add_comment, name='add_comment'),
     path('follow/', views.follow_index, name='follow_index'),

@@ -1,7 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.core.paginator import Paginator
 from django.views.decorators.cache import cache_page
-
 from .models import Post, Group, Follow, User
 from .forms import PostForm, CommentForm
 from django.contrib.auth.decorators import login_required
@@ -69,7 +68,7 @@ def post_detail(request, post_id):
     return render(request, "posts/post_detail.html", context)
 
 
-#это моя фишка(вне курса ЯП)
+# это моя фишка(вне курса ЯП)
 @login_required
 def post_delete(request, post_id):
     post = get_object_or_404(Post, pk=post_id)
@@ -147,7 +146,6 @@ def follow_index(request):
 
 @login_required
 def profile_follow(request, username):
-    # Подписаться на автора
     user = get_object_or_404(User, username=username)
     if request.user == user:
         return redirect('posts:index')

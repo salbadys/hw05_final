@@ -62,10 +62,12 @@ class TaskPagesTests(TestCase):
                 reverse("posts:profile", kwargs={"username": self.user})
             ),
             "posts/post_detail.html": (
-                reverse("posts:post_detail", kwargs={"post_id": self.pk_test_post})
+                reverse("posts:post_detail",
+                        kwargs={"post_id": self.pk_test_post})
             ),
             "posts/create_post.html": (
-                reverse("posts:post_edit", kwargs={"post_id": self.pk_test_post})
+                reverse("posts:post_edit",
+                        kwargs={"post_id": self.pk_test_post})
             ),
         }
         for template, reverse_name in templates_page_names.items():
@@ -170,12 +172,14 @@ class TaskPagesTests(TestCase):
         """Проверка добавление комментария на странице поста"""
         form_data = {"text": "Check comment"}
         response = self.authorized_client.post(
-            reverse("posts:add_comment", kwargs={"post_id": self.pk_test_post}),
+            reverse("posts:add_comment",
+                    kwargs={"post_id": self.pk_test_post}),
             data=form_data,
             follow=True,
         )
         response = self.authorized_client.get(
-            reverse("posts:post_detail", kwargs={"post_id": self.pk_test_post}),
+            reverse("posts:post_detail",
+                    kwargs={"post_id": self.pk_test_post}),
         )
         self.assertIn(Comment.objects.get(
             text="Check comment"), response.context["comments"]
@@ -195,7 +199,7 @@ class TaskPagesTests(TestCase):
         )
         self.assertTrue(
             Follow.objects.filter(user=self.user).
-            filter(author=self.user_M)
+                filter(author=self.user_M)
         )
         self.authorized_client.get(
             reverse('posts:profile_unfollow',
@@ -203,7 +207,7 @@ class TaskPagesTests(TestCase):
         )
         self.assertFalse(
             Follow.objects.filter(user=self.user).
-            filter(author=self.user_M)
+                filter(author=self.user_M)
         )
 
     def test_check_requst_view_follow(self):
