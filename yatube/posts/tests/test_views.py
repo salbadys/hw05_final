@@ -198,16 +198,18 @@ class TaskPagesTests(TestCase):
                     kwargs={"username": self.user_M})
         )
         self.assertTrue(
-            Follow.objects.filter(user=self.user).
-                filter(author=self.user_M)
+            Follow.objects.filter(
+                user=self.user,
+                author=self.user_M)
         )
         self.authorized_client.get(
             reverse('posts:profile_unfollow',
                     kwargs={"username": self.user_M})
         )
         self.assertFalse(
-            Follow.objects.filter(user=self.user).
-                filter(author=self.user_M)
+            Follow.objects.filter(
+                user=self.user,
+                author=self.user_M)
         )
 
     def test_check_requst_view_follow(self):

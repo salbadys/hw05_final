@@ -61,7 +61,8 @@ class TaskURLTests(TestCase):
 
     def test_edit_user(self):
         """edit поста доступно только автору"""
-        response = self.authorized_client.get(f"/posts/{self.test_post}/edit/")
+        response = self.authorized_client.get(
+            f"/posts/{self.test_post}/edit/")
         self.assertTemplateUsed(response, "posts/create_post.html")
         self.assertEqual(response.status_code, 200)
 
@@ -71,17 +72,23 @@ class TaskURLTests(TestCase):
         self.assertEqual(response.status_code, 302)
 
     def test_edit_post_guest_client(self):
-        response = self.guest_client.get(f"/posts/{self.test_post}/edit/")
-        self.assertRedirects(response,
-                             f"/auth/login/?next=/posts/{self.test_post}/edit/")
+        response = self.guest_client.get(
+            f"/posts/{self.test_post}/edit/")
+        self.assertRedirects(
+            response,
+            f"/auth/login/?next=/posts/{self.test_post}/edit/"
+        )
         self.assertEqual(response.status_code, 302)
 
     def test_add_comment_guest_client(self):
         response = self.guest_client.get(
-            reverse("posts:add_comment", kwargs={"post_id": self.test_post}),
+            reverse("posts:add_comment",
+                    kwargs={"post_id": self.test_post}),
         )
-        self.assertRedirects(response,
-                             f"/auth/login/?next=/posts/{self.test_post}/comment/")
+        self.assertRedirects(
+            response,
+            f"/auth/login/?next=/posts/{self.test_post}/comment/"
+        )
         self.assertEqual(response.status_code, 302)
 
     def test_password_change_guest(self):
@@ -91,7 +98,8 @@ class TaskURLTests(TestCase):
         self.assertEqual(response.status_code, 302)
 
     def test_password_change_user(self):
-        response = self.authorized_client.get("/auth/password_change/")
+        response = self.authorized_client.get(
+            "/auth/password_change/")
         self.assertEqual(response.status_code, 200)
 
     def test_follow_guest(self):
@@ -115,8 +123,7 @@ class TaskURLTests(TestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_follow_self_user(self):
-        response = self.authorized_client.get(f"/profile/{self.user}/follow/")
+        response = self.authorized_client.get(
+            f"/profile/{self.user}/follow/")
         self.assertRedirects(response, "/")
         self.assertEqual(response.status_code, 302)
-
-

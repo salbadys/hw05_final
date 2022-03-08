@@ -97,7 +97,8 @@ class PostFormTests(TestCase):
             follow=True,
         )
         self.assertRedirects(
-            response, reverse("posts:post_detail", kwargs={"post_id": self.pk_test_post})
+            response,
+            reverse("posts:post_detail", kwargs={"post_id": self.pk_test_post})
         )
         self.assertEqual(Post.objects.count(), tasks_count)
         response = self.authorized_client.get(
