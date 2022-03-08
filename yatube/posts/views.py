@@ -2,12 +2,10 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.core.paginator import Paginator
 from django.views.decorators.cache import cache_page
 
-from .models import Post, Group, Follow
-from django.contrib.auth import get_user_model
+from .models import Post, Group, Follow, User
 from .forms import PostForm, CommentForm
 from django.contrib.auth.decorators import login_required
 
-User = get_user_model()
 PER_PAGE: int = 10
 
 
@@ -55,9 +53,9 @@ def profile(request, username):
 
 
 def post_detail(request, post_id):
+    post = get_object_or_404(Post, pk=post_id)
     form = CommentForm(
         request.POST or None)
-    post = Post.objects.get(pk=post_id)
     comments = post.comments.all()
     count = Post.objects.filter(group=post.group).count()
     context = {
@@ -67,6 +65,9 @@ def post_detail(request, post_id):
         "comments": comments
     }
     return render(request, "posts/post_detail.html", context)
+
+
+
 
 
 @login_required()
@@ -85,8 +86,7 @@ def post_create(request):
 @login_required()
 def post_edit(request, post_id):
     post = get_object_or_404(Post, pk=post_id)
-    user = request.user
-    if user != post.author:
+    if request.user != post.author:
         count = Post.objects.filter(group=post.group).count()
         context = {"post": post, "count": count}
         return render(request, "posts/post_detail.html", context)

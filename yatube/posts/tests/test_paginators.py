@@ -13,16 +13,13 @@ class TestPaginator(TestCase):
     @classmethod
     def setUpClass(cls):
         cache.clear()
-        User.objects.create(username="Alex3")
+        cls.user = User.objects.create(username="Alex3")
         super().setUpClass()
-        Group.objects.create(
+        cls.group = Group.objects.create(
             title="Название группы",
             slug="group1",
             description="Для теста описание",
         )
-        cls.user = User.objects.get(username="Alex3")
-        cls.group = Group.objects.get(title="Название группы")
-
         objs = (
             Post(
                 text="Текст поста",
@@ -34,7 +31,6 @@ class TestPaginator(TestCase):
         Post.objects.bulk_create(objs)
 
     def setUp(self):
-        self.user = User.objects.get(username="Alex3")
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user)
 
@@ -42,8 +38,8 @@ class TestPaginator(TestCase):
         """Шаблон страниц сформирован с правильным контекстом."""
         templates_page_names = (
             reverse("posts:index"),
-            reverse("posts:group_list", kwargs={"slug": "group1"}),
-            reverse("posts:profile", kwargs={"username": "Alex3"}),
+            reverse("posts:group_list", kwargs={"slug": self.group.slug}),
+            reverse("posts:profile", kwargs={"username": self.user}),
         )
         for page in templates_page_names:
             response = self.authorized_client.get(page)

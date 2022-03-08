@@ -10,23 +10,24 @@ User = get_user_model()
 class TaskURLTests(TestCase):
     @classmethod
     def setUpClass(cls):
-        User.objects.create(username="Alex")
+        cls.test_post = 1
+        cls.user = User.objects.create(username="Alex")
         super().setUpClass()
-        Group.objects.create(
+        cls.group = Group.objects.create(
             title="Название группы",
             slug="group1",
             description="Для теста описание",
         )
         Post.objects.create(
             text="Текст поста",
-            author=User.objects.get(username="Alex"),
-            group=Group.objects.get(title="Название группы"),
+            author=User.objects.get(username=cls.user),
+            group=Group.objects.get(title=cls.group),
         )
 
     def setUp(self):
         cache.clear()
         self.guest_client = Client()
-        self.user = User.objects.get(username="Alex")
+        self.user = User.objects.get(username=self.user)
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user)
 
@@ -34,12 +35,12 @@ class TaskURLTests(TestCase):
         url_page_names = {
             "posts/index.html": "/",
             "posts/group_list.html": reverse(
-                "posts:group_list", kwargs={"slug": "group1"}
+                "posts:group_list", kwargs={"slug": self.group.slug}
             ),
             "posts/profile.html": reverse(
-                "posts:profile", kwargs={"username": "Alex"}
+                "posts:profile", kwargs={"username": self.user}
             ),
-            "posts/post_detail.html": "/posts/1/",
+            "posts/post_detail.html": f"/posts/{self.test_post}/",
         }
         for template, reverse_name in url_page_names.items():
             with self.subTest(template=template):
@@ -60,7 +61,7 @@ class TaskURLTests(TestCase):
 
     def test_edit_user(self):
         """edit поста доступно только автору"""
-        response = self.authorized_client.get("/posts/1/edit/")
+        response = self.authorized_client.get(f"/posts/{self.test_post}/edit/")
         self.assertTemplateUsed(response, "posts/create_post.html")
         self.assertEqual(response.status_code, 200)
 
@@ -76,7 +77,7 @@ class TaskURLTests(TestCase):
 
     def test_add_comment_guest_client(self):
         response = self.guest_client.get(
-            reverse("posts:add_comment", kwargs={"post_id": 1}),
+            reverse("posts:add_comment", kwargs={"post_id": self.test_post}),
         )
-        self.assertRedirects(response, "/auth/login/?next=/posts/1/comment/")
+        self.assertRedirects(response, f"/auth/login/?next=/posts/{self.test_post}/comment/")
         self.assertEqual(response.status_code, 302)

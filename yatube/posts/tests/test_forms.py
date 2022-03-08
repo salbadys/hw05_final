@@ -9,6 +9,7 @@ User = get_user_model()
 
 class PostFormTests(TestCase):
     def setUp(self):
+        self.pk_test_post = 1
         self.guest_client = Client()
         self.user = User.objects.create(username="Alex")
         self.authorized_client = Client()
@@ -24,12 +25,16 @@ class PostFormTests(TestCase):
             reverse("posts:post_create"), data=form_data, follow=True
         )
         self.assertRedirects(
-            response, reverse("posts:profile", kwargs={"username": "Alex"})
+            response, reverse("posts:profile", kwargs={"username": self.user})
         )
         self.assertEqual(Post.objects.count(), tasks_count + 1)
+        first_object = response.context["page_obj"][0]
+        task_text_0 = first_object.text
+        task_author_0 = first_object.author
         self.assertTrue(
             Post.objects.filter(
-                text="Тестовый заголовок 2",
+                text=task_text_0,
+                author=task_author_0
             ).exists()
         )
 
@@ -57,18 +62,22 @@ class PostFormTests(TestCase):
             reverse("posts:post_create"), data=form_data, follow=True
         )
         self.assertRedirects(
-            response, reverse("posts:profile", kwargs={"username": "Alex"})
+            response, reverse("posts:profile", kwargs={"username": self.user})
         )
         self.assertEqual(Post.objects.count(), tasks_count + 1)
+        first_object = response.context["page_obj"][0]
+        task_text_0 = first_object.text
+        task_image_0 = first_object.image
         self.assertTrue(
             Post.objects.filter(
-                text="Тестовый заголовок 2",
+                text=task_text_0,
+                image=task_image_0
             ).exists()
         )
 
     def test_edit_post(self):
         """Корректность работы редактирования поста"""
-        Group.objects.create(
+        self.group = Group.objects.create(
             title="Группа для теста",
             slug="group1",
             description="Тестовое описание",
@@ -76,23 +85,28 @@ class PostFormTests(TestCase):
         )
         Post.objects.create(
             text="Тестовый заголовок",
-            author=User.objects.get(username="Alex"),
-            group=Group.objects.get(title="Группа для теста"),
+            author=User.objects.get(username=self.user),
+            group=Group.objects.get(title=self.group),
         )
 
         tasks_count = Post.objects.count()
-        form_data = {"text": "Тестовый заголовок 2", "group": 1}
+        form_data = {"text": "Тестовый заголовок 2", "group": self.group.pk}
         response = self.authorized_client.post(
-            reverse("posts:post_edit", kwargs={"post_id": "1"}),
+            reverse("posts:post_edit", kwargs={"post_id": self.pk_test_post}),
             data=form_data,
             follow=True,
         )
         self.assertRedirects(
-            response, reverse("posts:post_detail", kwargs={"post_id": "1"})
+            response, reverse("posts:post_detail", kwargs={"post_id": self.pk_test_post})
         )
         self.assertEqual(Post.objects.count(), tasks_count)
+        response = self.authorized_client.get(
+            reverse("posts:post_detail", kwargs={"post_id": self.pk_test_post})
+        )
+        first_object = response.context["post"]
+        task_text_0 = first_object.text
         self.assertTrue(
             Post.objects.filter(
-                text="Тестовый заголовок 2",
+                text=task_text_0,
             ).exists()
         )

@@ -14,9 +14,10 @@ NUM_P = 10
 class TaskPagesTests(TestCase):
     @classmethod
     def setUpClass(cls):
-        User.objects.create(username="Alex1")
+        cls.pk_test_post = 10
+        cls.user = User.objects.create(username="Alex1")
         super().setUpClass()
-        Group.objects.create(
+        cls.group = Group.objects.create(
             title="Название группы",
             slug="group1",
             description="Для теста описание",
@@ -38,15 +39,15 @@ class TaskPagesTests(TestCase):
         for _ in range(NUM_P):
             Post.objects.create(
                 text="Текст поста",
-                author=User.objects.get(username="Alex1"),
-                group=Group.objects.get(title="Название группы"),
+                author=User.objects.get(username=cls.user),
+                group=Group.objects.get(title=cls.group),
                 image=uploaded
             )
 
     def setUp(self):
         cache.clear()
         self.guest_client = Client()
-        self.user = User.objects.get(username="Alex1")
+        self.user = User.objects.get(username=self.user)
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user)
 
@@ -55,16 +56,16 @@ class TaskPagesTests(TestCase):
         templates_page_names = {
             "posts/index.html": reverse("posts:index"),
             "posts/group_list.html": (
-                reverse("posts:group_list", kwargs={"slug": "group1"})
+                reverse("posts:group_list", kwargs={"slug": self.group.slug})
             ),
             "posts/profile.html": (
-                reverse("posts:profile", kwargs={"username": "Alex1"})
+                reverse("posts:profile", kwargs={"username": self.user})
             ),
             "posts/post_detail.html": (
-                reverse("posts:post_detail", kwargs={"post_id": "1"})
+                reverse("posts:post_detail", kwargs={"post_id": self.pk_test_post})
             ),
             "posts/create_post.html": (
-                reverse("posts:post_edit", kwargs={"post_id": "1"})
+                reverse("posts:post_edit", kwargs={"post_id": self.pk_test_post})
             ),
         }
         for template, reverse_name in templates_page_names.items():
@@ -83,8 +84,8 @@ class TaskPagesTests(TestCase):
         """Шаблон страниц сформирован с правильным контекстом."""
         templates_page_names = (
             reverse("posts:index"),
-            reverse("posts:group_list", kwargs={"slug": "group1"}),
-            reverse("posts:profile", kwargs={"username": "Alex1"}),
+            reverse("posts:group_list", kwargs={"slug": self.group.slug}),
+            reverse("posts:profile", kwargs={"username": self.user}),
         )
         for page in templates_page_names:
             response = self.authorized_client.get(page)
@@ -94,27 +95,27 @@ class TaskPagesTests(TestCase):
             task_group_0 = first_object.group.title
             task_image_0 = first_object.image
             self.assertEqual(task_text_0, "Текст поста")
-            self.assertEqual(task_author_0, "Alex1")
-            self.assertEqual(task_group_0, "Название группы")
+            self.assertEqual(task_author_0, self.user.username)
+            self.assertEqual(task_group_0, self.group.title)
             self.assertTrue(task_image_0)
 
     def test_task_list_page_group_context(self):
         """Шаблон post_detail сформирован с правильным контекстом."""
         response = self.authorized_client.get(
-            reverse("posts:post_detail", kwargs={"post_id": "1"})
+            reverse("posts:post_detail", kwargs={"post_id": self.pk_test_post})
         )
         first_object = response.context["post"]
         task_text_0 = first_object.text
         task_author_0 = first_object.author.username
         task_group_0 = first_object.group.title
         self.assertEqual(task_text_0, "Текст поста")
-        self.assertEqual(task_author_0, "Alex1")
-        self.assertEqual(task_group_0, "Название группы")
+        self.assertEqual(task_author_0, self.user.username)
+        self.assertEqual(task_group_0, self.group.title)
 
     def test_post_edit_context(self):
         """Корректность шаблона редактирования и создания поста"""
         page_names = (
-            reverse("posts:post_edit", kwargs={"post_id": "1"}),
+            reverse("posts:post_edit", kwargs={"post_id": self.pk_test_post}),
             reverse("posts:post_create"),
         )
         for form in page_names:
@@ -130,33 +131,33 @@ class TaskPagesTests(TestCase):
 
     def test_create_post_index(self):
         """Проверка появления постов на страницах"""
-        Group.objects.create(
+        self.group = Group.objects.create(
             title="Група 2",
             slug="group2",
             description="Для теста описание",
         )
-        Post.objects.create(
+        self.post = Post.objects.create(
             text="Текст от группы 2",
-            author=User.objects.get(username="Alex1"),
-            group=Group.objects.get(title="Група 2"),
+            author=User.objects.get(username=self.user),
+            group=Group.objects.get(title=self.group),
         )
         templates_page_names = (
             reverse("posts:index"),
-            reverse("posts:group_list", kwargs={"slug": "group2"}),
-            reverse("posts:profile", kwargs={"username": "Alex1"}),
+            reverse("posts:group_list", kwargs={"slug": self.group.slug}),
+            reverse("posts:profile", kwargs={"username": self.user}),
         )
         for page in templates_page_names:
             response = self.authorized_client.get(page)
             self.assertIn(
                 Post.objects.get(
-                    text="Текст от группы 2"), response.context["page_obj"]
+                    text=self.post.text), response.context["page_obj"]
             )
 
     def test_control_edit_post(self):
         """Проверка добавление поста при редактировании на главную"""
         form_data = {"text": "Check", "group": 1}
         self.authorized_client.post(
-            reverse("posts:post_edit", kwargs={"post_id": 10}),
+            reverse("posts:post_edit", kwargs={"post_id": self.pk_test_post}),
             data=form_data,
             follow=True,
         )
@@ -169,68 +170,67 @@ class TaskPagesTests(TestCase):
         """Проверка добавление комментария на странице поста"""
         form_data = {"text": "Check comment"}
         response = self.authorized_client.post(
-            reverse("posts:add_comment", kwargs={"post_id": 10}),
+            reverse("posts:add_comment", kwargs={"post_id": self.pk_test_post}),
             data=form_data,
             follow=True,
         )
         response = self.authorized_client.get(
-            reverse("posts:post_detail", kwargs={"post_id": 10}),
+            reverse("posts:post_detail", kwargs={"post_id": self.pk_test_post}),
         )
         self.assertIn(Comment.objects.get(
             text="Check comment"), response.context["comments"]
         )
 
     def test_check_requst_user_work_follow(self):
-        User.objects.create(username="Mike")
-        mike = User.objects.get(username="Mike")
+        self.user_M = User.objects.create(username="Mike")
         Post.objects.create(
             text="Пост Майка",
-            author=User.objects.get(username="Mike"),
-            group=Group.objects.get(title="Название группы"),
+            author=User.objects.get(username=self.user_M),
+            group=Group.objects.get(title=self.group),
         )
 
         self.authorized_client.get(
             reverse('posts:profile_follow',
-                    kwargs={"username": "Mike"})
+                    kwargs={"username": self.user_M})
         )
         self.assertTrue(
             Follow.objects.filter(user=self.user).
-            filter(author=mike)
+            filter(author=self.user_M)
         )
         self.authorized_client.get(
             reverse('posts:profile_unfollow',
-                    kwargs={"username": "Mike"})
+                    kwargs={"username": self.user_M})
         )
         self.assertFalse(
             Follow.objects.filter(user=self.user).
-            filter(author=mike)
+            filter(author=self.user_M)
         )
 
     def test_check_requst_view_follow(self):
         """Появленее записей у подписанных и неподп."""
-        User.objects.create(username="Mike")
-        User.objects.create(username="Vova")
-        Post.objects.create(
+        self.user_M = User.objects.create(username="Mike")
+        self.user_V = User.objects.create(username="Vova")
+        self.post_L = Post.objects.create(
             text="Пост Майка",
-            author=User.objects.get(username="Mike"),
-            group=Group.objects.get(title="Название группы"),
+            author=User.objects.get(username=self.user_M),
+            group=Group.objects.get(title=self.group.title),
         )
         self.authorized_client.get(
             reverse('posts:profile_follow',
-                    kwargs={"username": "Mike"})
+                    kwargs={"username": self.user_M})
         )
         response = self.authorized_client.get(reverse(
             "posts:follow_index")
         )
         self.assertIn(Post.objects.get(
-            text="Пост Майка"), response.context["page_obj"]
+            text=self.post_L), response.context["page_obj"]
         )
-        self.user = User.objects.get(username="Vova")
+        self.user = User.objects.get(username=self.user_V)
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user)
         response = self.authorized_client.get(reverse(
             "posts:follow_index")
         )
         self.assertIsNot(Post.objects.get(
-            text="Пост Майка"), response.context["page_obj"]
+            text=self.post_L), response.context["page_obj"]
         )

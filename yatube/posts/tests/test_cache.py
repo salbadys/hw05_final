@@ -10,25 +10,28 @@ NUM_P = 13
 
 
 class TaskCacheTests(TestCase):
-    def setUp(self):
-        cache.clear()
-        User.objects.create(username="Alex1")
+    @classmethod
+    def setUpClass(cls):
         super().setUpClass()
-        Group.objects.create(
+        cache.clear()
+        cls.user = User.objects.create(username="Alex1")
+        cls.group = Group.objects.create(
             title="Название группы",
             slug="group1",
             description="Для теста описание",
             pk=1,
         )
+
+    def setUp(self):
         for _ in range(NUM_P):
             Post.objects.create(
                 text="Текст поста",
-                author=User.objects.get(username="Alex1"),
-                group=Group.objects.get(title="Название группы"),
+                author=User.objects.get(username=self.user),
+                group=Group.objects.get(title=self.group),
             )
 
         self.guest_client = Client()
-        self.user = User.objects.get(username="Alex1")
+        self.user = User.objects.get(username=self.user)
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user)
 
