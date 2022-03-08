@@ -4,7 +4,8 @@
 {% block content %}
     {% include 'posts/includes/switcher.html' %}
     <div class="container py-5">
-            <h1>Последние обновления на сайте</h1>
+            <h3>Всего {{ post_count }}  постов </h3>
+            <h4>Последние обновления на сайте:</h4>
             <article>
                 {% for post in page_obj %}
                     <ul>

@@ -33,6 +33,9 @@
                 {% if post.author == request.user %}
                     <a class="btn btn-primary" href="{% url 'posts:post_edit' post.pk %}">редактировать запись</a>
                 {% endif %}
+                {% if post.author == request.user %}
+                    <a class="btn btn-primary" href="{% url 'posts:post_delete' post.pk %}">Удалить запись</a>
+                {% endif %}
             {% endif %}
         </article>
     {% include 'posts/add_comment.html' %}

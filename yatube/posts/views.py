@@ -12,11 +12,13 @@ PER_PAGE: int = 10
 @cache_page(20 * 1)
 def index(request):
     post_list = Post.objects.all()
+    post_count = post_list.count()
     paginator = Paginator(post_list, PER_PAGE)
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
     context = {
         "page_obj": page_obj,
+        "post_count": post_count
     }
     return render(request, "posts/index.html", context)
 
@@ -67,7 +69,14 @@ def post_detail(request, post_id):
     return render(request, "posts/post_detail.html", context)
 
 
-
+#это моя фишка(вне курса ЯП)
+@login_required
+def post_delete(request, post_id):
+    post = get_object_or_404(Post, pk=post_id)
+    if request.user != post.author:
+        return redirect("posts/index.html")
+    post.delete()
+    return redirect('posts:index')
 
 
 @login_required()
@@ -125,11 +134,13 @@ def follow_index(request):
         flat=True
     )
     post_list = Post.objects.filter(author_id__in=authors_ids)
+    post_count = post_list.count()
     paginator = Paginator(post_list, PER_PAGE)
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
     context = {
         "page_obj": page_obj,
+        "post_count": post_count
     }
     return render(request, "posts/follow.html", context)
 
