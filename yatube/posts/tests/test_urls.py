@@ -27,7 +27,6 @@ class TaskURLTests(TestCase):
     def setUp(self):
         cache.clear()
         self.guest_client = Client()
-        self.user = User.objects.get(username=self.user)
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user)
 
