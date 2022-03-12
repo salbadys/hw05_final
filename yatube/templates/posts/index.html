@@ -5,6 +5,14 @@
     {% include 'posts/includes/switcher.html' %}
     <div class="container py-5">
             <h3>Всего {{ post_count }}  постов </h3>
+            <form class="form-inline my-2 my-lg-0"
+                  action="{% url 'posts:index' %}">
+                <input class="form-control mr-sm-2" type="search"
+                       placeholder="Введите искомый текст" aria-label="Search"
+                       name="search">
+                <button class="btn btn-outline-success my-2 my-sr-0"
+                        type="submit">Найти нужный пост</button>
+            </form>
             <h4>Последние обновления на сайте:</h4>
             <article>
                 {% for post in page_obj %}

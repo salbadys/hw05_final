@@ -15,6 +15,9 @@ urlpatterns = [
     path("posts/<post_id>/edit/", views.post_edit, name="post_edit"),
     # это моя фишка(вне ЯП)
     path("posts/<int:post_id>/delete/", views.post_delete, name="post_delete"),
+    # это моя фишка(вне ЯП)
+    path("posts/comment/<int:comment_id>/delete/", views.comment_delete,
+         name="comment_delete"),
     path('posts/<post_id>/comment/', views.add_comment, name='add_comment'),
     path('follow/', views.follow_index, name='follow_index'),
     path(

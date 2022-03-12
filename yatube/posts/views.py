@@ -1,16 +1,20 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.core.paginator import Paginator
 from django.views.decorators.cache import cache_page
-from .models import Post, Group, Follow, User
+from .models import Post, Group, Follow, User, Comment
 from .forms import PostForm, CommentForm
 from django.contrib.auth.decorators import login_required
 
 PER_PAGE: int = 10
 
 
-@cache_page(20 * 1)
+#@cache_page(20 * 1)
 def index(request):
-    post_list = Post.objects.all()
+    search_query = request.GET.get('search', '')
+    if search_query:
+        post_list = Post.objects.filter(text__icontains=search_query)
+    else:
+        post_list = Post.objects.select_related('author', 'group').all()
     post_count = post_list.count()
     paginator = Paginator(post_list, PER_PAGE)
     page_number = request.GET.get("page")
@@ -73,7 +77,7 @@ def post_detail(request, post_id):
 def post_delete(request, post_id):
     post = get_object_or_404(Post, pk=post_id)
     if request.user != post.author:
-        return redirect("posts/index.html")
+        return redirect("posts:index.html")
     post.delete()
     return redirect('posts:index')
 
@@ -123,6 +127,13 @@ def add_comment(request, post_id):
         comment.save()
     return redirect('posts:post_detail', post_id=post_id)
 
+@login_required
+def comment_delete(request, comment_id):
+    comment = get_object_or_404(Comment, pk=comment_id)
+    if request.user != comment.author:
+        return redirect('posts:index')
+    comment.delete()
+    return redirect('posts:index')
 
 @login_required
 def follow_index(request):

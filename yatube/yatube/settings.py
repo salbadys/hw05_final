@@ -1,23 +1,20 @@
 import os
 
-
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 STATICFILES_DIRS = (os.path.join(BASE_DIR, "static"),)
 
-
 SECRET_KEY = "%=#+v(c_$=fe2id@gjg+$tkw@n4k$ahe*n)^716^!t-$ax^ot1"
 
-
-DEBUG = True
-
+DEBUG = False
 
 ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
     '[::1]',
     'testserver',
+    'www.salbad.pythonanywhere.com',
+    'salbad.pythonanywhere.com'
 ]
-
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -31,6 +28,7 @@ INSTALLED_APPS = [
     "core.apps.CoreConfig",
     "about.apps.AboutConfig",
     "sorl.thumbnail",
+    'debug_toolbar',
 ]
 
 MIDDLEWARE = [
@@ -41,6 +39,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
 ]
 
 ROOT_URLCONF = "yatube.urls"
@@ -64,14 +63,12 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "yatube.wsgi.application"
 
-
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": os.path.join(BASE_DIR, "db.sqlite3"),
     }
 }
-
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -88,6 +85,9 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+INTERNAL_IPS = [
+    '127.0.0.1',
+]
 
 LANGUAGE_CODE = "ru"
 
@@ -98,7 +98,6 @@ USE_I18N = True
 USE_L10N = True
 
 USE_TZ = True
-
 
 STATIC_URL = "/static/"
 LOGIN_URL = "login"
